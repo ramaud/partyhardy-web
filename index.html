@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PartyHardy — Nightlife Discovery</title>
+  <meta name="description" content="PartyHardy is a nightlife event discovery app. Find live parties, genre-filtered events, and what's happening right now near you." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0A0A0F;
+      --surface: #13131A;
+      --accent: #E8FF47;
+      --purple: #7B2FFF;
+      --pink: #FF3CAC;
+      --live: #FF3C3C;
+      --text: #F0F0F5;
+      --muted: #6B6B80;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Background glow blobs */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-glow::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(123,47,255,0.18) 0%, transparent 70%);
+      animation: drift1 12s ease-in-out infinite alternate;
+    }
+
+    .bg-glow::after {
+      content: '';
+      position: absolute;
+      bottom: -10%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255,60,172,0.14) 0%, transparent 70%);
+      animation: drift2 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(60px, 40px); }
+    }
+    @keyframes drift2 {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(-50px, -30px); }
+    }
+
+    /* Grid noise overlay */
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* Layout */
+    main {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+      text-align: center;
+    }
+
+    /* Logo mark */
+    .logo-mark {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .bar {
+      width: 8px;
+      background: var(--accent);
+      border-radius: 4px;
+      animation: pulse-bar 2s ease-in-out infinite;
+    }
+
+    .bar:nth-child(1) { height: 18px; animation-delay: 0s; }
+    .bar:nth-child(2) { height: 30px; animation-delay: 0.15s; }
+    .bar:nth-child(3) { height: 22px; animation-delay: 0.3s; }
+
+    @keyframes pulse-bar {
+      0%, 100% { opacity: 1; transform: scaleY(1); }
+      50%       { opacity: 0.6; transform: scaleY(0.75); }
+    }
+
+    /* Heading */
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.6rem, 8vw, 5.5rem);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+
+    h1 span.accent {
+      color: var(--accent);
+    }
+
+    /* Live badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255,60,60,0.12);
+      border: 1px solid rgba(255,60,60,0.3);
+      color: var(--live);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.8s 0.05s ease both;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--live);
+      border-radius: 50%;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* Tagline */
+    .tagline {
+      margin-top: 20px;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.65;
+      font-weight: 400;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    /* Divider */
+    .divider {
+      width: 48px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--pink));
+      border-radius: 2px;
+      margin: 36px auto;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    /* Genre pills */
+    .genres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 48px;
+      animation: fadeUp 0.8s 0.35s ease both;
+    }
+
+    .genre-pill {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 6px 16px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.03);
+      letter-spacing: 0.04em;
+      transition: all 0.25s;
+    }
+
+    .genre-pill:hover {
+      color: var(--text);
+      border-color: rgba(232,255,71,0.3);
+      background: rgba(232,255,71,0.05);
+    }
+
+    /* CTA block */
+    .cta-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      animation: fadeUp 0.8s 0.4s ease both;
+    }
+
+    .coming-soon-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .app-badges {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .app-badge {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.25s;
+    }
+
+    .app-badge:hover {
+      border-color: rgba(232,255,71,0.25);
+      background: rgba(232,255,71,0.04);
+      transform: translateY(-2px);
+    }
+
+    .app-badge svg {
+      opacity: 0.7;
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 1;
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      animation: fadeUp 0.8s 0.5s ease both;
+    }
+
+    footer p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .app-badges { flex-direction: column; align-items: stretch; }
+      .app-badge { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow"></div>
+  <div class="noise"></div>
+
+  <main>
+
+    <div class="logo-mark">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+
+    <div class="badge">
+      <div class="dot"></div>
+      Nightlife Discovery
+    </div>
+
+    <h1>Party<span class="accent">Hardy</span></h1>
+
+    <p class="tagline">
+      Find what's happening right now. Genre-filtered live events, Starting Soon feeds, and real-time nightlife discovery — all in one app.
+    </p>
+
+    <div class="divider"></div>
+
+    <div class="genres">
+      <span class="genre-pill">House</span>
+      <span class="genre-pill">Techno</span>
+      <span class="genre-pill">Rap</span>
+      <span class="genre-pill">R&amp;B</span>
+      <span class="genre-pill">Indie</span>
+      <span class="genre-pill">Afrobeats</span>
+      <span class="genre-pill">EDM</span>
+    </div>
+
+    <div class="cta-block">
+      <span class="coming-soon-label">App coming soon</span>
+      <div class="app-badges">
+        <a href="#" class="app-badge">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          App Store
+        </a>
+        <a href="#" class="app-badge">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M3.18 23.76c.3.17.65.19.97.07l11.46-6.62-2.5-2.5-9.93 9.05zm-1.15-20.1C1.74 4.04 1.5 4.5 1.5 5.14v13.72c0 .64.24 1.1.53 1.48l.08.07 7.69-7.69v-.18L2.03 3.66zm17.36 8.9l-2.18-1.26-2.81 2.81 2.81 2.81 2.19-1.27c.62-.36.62-.94 0-1.3l-.01.01zM4.15.23L15.61 6.85l-2.5 2.5L3.18.3c.31-.12.67-.1.97-.07z"/></svg>
+          Google Play
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>PartyHardy OÜ &nbsp;·&nbsp; Tornimäe 5, Tallinn, Estonia &nbsp;·&nbsp; <a href="mailto:hello@partyhardy.app">hello@partyhardy.app</a></p>
+  </footer>
+
+</body>
+</html>
