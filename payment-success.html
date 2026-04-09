@@ -1,0 +1,111 @@
+if (url.pathname === '/payment-success') {
+  return new Response(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PartyHardy — You're In</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { 
+    background: #0A0A0F; 
+    font-family: system-ui, sans-serif; 
+    color: #F0F0F5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    text-align: center;
+    max-width: 320px;
+  }
+  .logo {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 32px;
+  }
+  .logo span { color: #E8FF47; }
+  .badge {
+    display: inline-block;
+    background: rgba(232,255,71,0.12);
+    border: 1px solid rgba(232,255,71,0.3);
+    color: #E8FF47;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  h1 span { color: #E8FF47; }
+  .sub {
+    font-size: 0.9rem;
+    color: #6B6B80;
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+  .countdown {
+    font-size: 0.85rem;
+    color: #6B6B80;
+    margin-bottom: 16px;
+  }
+  .countdown span {
+    color: #E8FF47;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .btn {
+    display: block;
+    background: #E8FF47;
+    color: #0A0A0F;
+    font-size: 1rem;
+    font-weight: 800;
+    padding: 16px 24px;
+    border-radius: 14px;
+    text-decoration: none;
+    margin-bottom: 12px;
+  }
+  .fallback {
+    font-size: 0.75rem;
+    color: #6B6B80;
+    line-height: 1.6;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Party<span>Hardy</span></div>
+  <div class="badge">⚡ INSIDER ACCESS UNLOCKED</div>
+  <h1>You're in the <span>Insiders</span> now</h1>
+  <p class="sub">Full access to Live events, Starting alerts, and the full map. Welcome to the party.</p>
+  <div class="countdown">Returning to PartyHardy in <span id="count">5</span>s</div>
+  <a href="partyhardy://payment-success" class="btn">Return to App →</a>
+  <p class="fallback">If the app doesn't open automatically,<br>open PartyHardy — your Insider access is ready.</p>
+</div>
+<script>
+  let seconds = 5;
+  const el = document.getElementById('count');
+  const timer = setInterval(() => {
+    seconds--;
+    el.textContent = seconds;
+    if (seconds <= 0) {
+      clearInterval(timer);
+      window.location.href = 'partyhardy://payment-success';
+    }
+  }, 1000);
+</script>
+</body>
+</html>`, {
+    headers: { 'Content-Type': 'text/html;charset=UTF-8' }
+  });
+}
